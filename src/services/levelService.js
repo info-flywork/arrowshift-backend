@@ -53,7 +53,17 @@ async function getArrowCount(number, conn = pool) {
   return row ? row.arrows.length : 0;
 }
 
-/** Bölüm tablosundaki sabit ödül (eski; artık lib/reward.js kullanılır). */
+/** Ödül hesabı için bölümün ok sayısı ve zorluk tabanı (levels.reward). */
+async function getRewardInputs(number, conn = pool) {
+  const total = await getTotal(conn);
+  if (total < 1) return { arrowCount: 0, levelReward: 0 };
+  const row = await getSlotRow(levelSlot(number, total), conn);
+  return row
+    ? { arrowCount: row.arrows.length, levelReward: row.reward }
+    : { arrowCount: 0, levelReward: 0 };
+}
+
+/** Bölüm tablosundaki zorluk tabanı (levels.reward). */
 async function getReward(number, conn = pool) {
   const total = await getTotal(conn);
   if (total < 1) return 0;
@@ -61,4 +71,4 @@ async function getReward(number, conn = pool) {
   return row ? row.reward : 0;
 }
 
-module.exports = { getTotal, getLevel, getReward, getArrowCount };
+module.exports = { getTotal, getLevel, getReward, getArrowCount, getRewardInputs };

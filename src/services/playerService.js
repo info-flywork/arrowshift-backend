@@ -21,11 +21,11 @@ async function completeTutorial(userId) {
 }
 
 async function completeLevel(userId, { level, livesLeft, durationMs = null, mistakes = null, clientEventId }) {
-  // Ok sayısı önbellekten/levels tablosundan okunur (transaction dışında; levels tablosu kullanıcı başına kilit gerektirmez).
-  const arrowCount = await levelService.getArrowCount(level);
+  // Ok sayısı ve zorluk tabanı önbellekten/levels tablosundan okunur (transaction dışında; levels tablosu kullanıcı başına kilit gerektirmez).
+  const { arrowCount, levelReward } = await levelService.getRewardInputs(level);
   // Eski istemciler hata sayısı göndermez: kalan candan türetilir.
   const mistakeCount = mistakes ?? Math.max(0, 3 - livesLeft);
-  const breakdown = calcReward({ level, arrowCount, durationMs, mistakes: mistakeCount });
+  const breakdown = calcReward({ levelReward, arrowCount, durationMs, mistakes: mistakeCount });
 
   return mutateUser(userId, { type: 'level_complete', clientEventId }, async (conn, user) => {
     const current = Number(user.current_level);
